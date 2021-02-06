@@ -1,0 +1,16 @@
+[db]
+host=localhost
+port=5432
+database=dev
+user=postgres
+password=password
+[port]
+port=5000
+[encrypt_secret]
+;encrypt_secret=
+[transform]
+host=localhost
+port=5432
+database=dev
+user=postgres
+password=password
