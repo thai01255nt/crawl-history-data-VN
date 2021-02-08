@@ -16,7 +16,7 @@ class TicketService(BaseService):
             'insertedRecords': [],
             'updatedRecords': []
         }
-        ssi_ticket_datas = TicketUtils.get_all_ssi_datas()[:10]
+        ssi_ticket_datas = TicketUtils.get_all_ssi_datas()
         history_vn_ticket_dataframe = DataUtils.records_to_dataframe(self.dao.get_all())
 
         if history_vn_ticket_dataframe is None:

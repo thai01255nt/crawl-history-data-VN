@@ -11,6 +11,7 @@ class StockOperatorTypeEnum(enum.Enum):
     UPCOM = 'UPCOM'
     FU = 'FU'
 
+
 class TickModel(db.Model):
     __tablename__ = 'ticket'
 

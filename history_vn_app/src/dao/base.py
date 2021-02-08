@@ -1,3 +1,7 @@
+from sqlalchemy.sql.expression import (
+    bindparam,
+    update
+)
 from ...db.psql import db
 
 
@@ -34,7 +38,19 @@ class BaseDAO():
     def update_all(self, records):
         if len(records) == 0:
             return []
-        db.session.bulk_update_mappings(self.model, records)
-        updated_record = db.session.commit()
-        print(updated_record)
-        return updated_record
+        bind = {}
+        for key in self.model.__table__.columns.keys():
+            if key == 'id':
+                continue
+            bind[key] = key
+        replace_field = f'{self.model.__table__.key}_id'
+        list_id = []
+        for record in records:
+            record[replace_field] = record['id']
+            list_id.append(record['id'])
+        sql_statement = update(self.model).where(self.model.id == bindparam(replace_field)).values(bind).returning(
+            self.model.id)
+        db.engine.execute(sql_statement, records)
+        updated_records = db.session.query(self.model).filter(self.model.id.in_(list_id)).all()
+        return updated_records
+
