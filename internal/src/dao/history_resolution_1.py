@@ -23,8 +23,8 @@ class HistoryResolution1DAO(BaseDAO):
             return results[0][0]
         raise Exception(f'Wrong query in {self.get_last_timestamp_by_symbol} function')
 
-    def get_by_ticket_id(self, ticket_id):
+    def get_by_symbol(self, symbol):
         results = db.session.query(self.model).filter(
-            db.and_(self.model.ticket_id == ticket_id)
+            db.and_(self.model.symbol == symbol)
         ).all()
         return results

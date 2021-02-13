@@ -30,10 +30,13 @@ class BaseDAO():
     def add_all(self, records):
         if len(records) == 0:
             return []
-        db.session.bulk_insert_mappings(self.model, records, return_defaults=True)
+        result_objects = db.session.execute(self.model.__table__.insert().values(records).returning(self.model.id))
+        list_id = []
+        for result_object in result_objects:
+            list_id.append(result_object['id'])
         db.session.commit()
-        schema_objects = [self.model(**record) for record in records]
-        return schema_objects
+        inserted_records = db.session.query(self.model).filter(self.model.id.in_(list_id)).all()
+        return inserted_records
 
     def update_all(self, records):
         if len(records) == 0:
