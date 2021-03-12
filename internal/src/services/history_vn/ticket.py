@@ -1,15 +1,26 @@
-from .base import BaseService
-from internal.src.dao.ticket import TicketDAO
-from internal.src.utils.history_utils.ticket_utils import TicketUtils
-from internal.src.utils.data_utils import DataUtils
-from internal.src.services.exception.response_exception import ResponseException
-from internal.src.common.consts.response_consts import ResponseCode
-from internal.src.common.consts.message_consts import TicketMessageConst
+from flask_api import status
+from internal.libs.http_handlers.exception.response_exception import ResponseException
+from internal.libs.http_handlers.exception.exception_consts import ExceptionMessage
+
+from internal.src.services.history_vn.history_vn_consts import TicketMessageConst
+from internal.src.services.base import BaseService
+from internal.src.repositories.ticket import TicketRepository
 
 
 class TicketService(BaseService):
     def __init__(self):
-        super().__init__(TicketDAO())
+        super().__init__(TicketRepository())
+        self.ticket_repo = TicketRepository()
+
+    def get_by_symbol(self, symbol):
+        ticket_records = self.ticket_repo.get_by_symbol(symbol)
+        if len(ticket_records) > 1:
+            raise ResponseException(http_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                                    message=TicketMessageConst.TICKET_SYMBOL_DUPLICATED.format(symbol=symbol))
+        elif len(ticket_records) == 0:
+            raise ResponseException(http_code=status.HTTP_404_NOT_FOUND,
+                                    message=TicketMessageConst.TICKET_SYMBOL_NOT_EXISTS.format(symbol=symbol))
+        return ticket_records
 
     def update_newest(self):
         return_data = {

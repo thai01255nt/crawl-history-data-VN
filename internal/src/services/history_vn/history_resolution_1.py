@@ -1,32 +1,28 @@
-from .base import BaseService
-from internal.src.dao.history_resolution_1 import HistoryResolution1DAO
-from internal.src.dao.ticket import TicketDAO
-from internal.src.services.exception.response_exception import ResponseException
-from internal.src.common.consts.response_consts import ResponseCode
-from internal.src.common.consts.message_consts import TicketMessageConst
-from internal.src.utils.history_utils.timestamp_utils import TimestampUtils
-from internal.src.utils.history_utils.crawl.ssi_utils import SSIUtils
-from internal.src.utils.data_utils import DataUtils
+from flask_api import status
+
+from internal.libs.http_handlers.exception.response_exception import ResponseException
+from internal.libs.utils.timestamp_utils import TimestampUtils
+
+from internal.src.services.base import BaseService
+from internal.src.services.history_vn.ticket import TicketService
+from internal.src.services.history_vn.history_vn_consts import TicketMessageConst
+from internal.src.repositories.history_resolution_1 import HistoryResolution1Repository
 
 
 class HistoryResolution1Service(BaseService):
     def __init__(self):
-        super().__init__(HistoryResolution1DAO())
-        self.ticket_dao = TicketDAO()
+        super().__init__(HistoryResolution1Repository())
+        self.history_resolution_1_repo = HistoryResolution1Repository()
+        self.ticket_service = TicketService()
 
     def update_newest_by_symbol(self, symbol):
-        ticket_records = self.ticket_dao.get_by_symbol(symbol)
-        if len(ticket_records) > 1:
-            raise ResponseException(http_code=ResponseCode.INTERNAL_SERVER_ERROR,
-                                    message=TicketMessageConst.TICKET_SYMBOL_DUPLICATED.format(symbol=symbol))
-        elif len(ticket_records) == 0:
-            raise ResponseException(http_code=ResponseCode.NOT_FOUND,
-                                    message=TicketMessageConst.TICKET_SYMBOL_NOT_EXISTS.format(symbol=symbol))
-        last_timestamp = self.dao.get_last_timestamp_by_symbol(symbol)
-        current_timestamp = int(TimestampUtils.timestamp_now())
-
-        if last_timestamp is None:
+        ticket_records = self.ticket_service.get_by_symbol(symbol=symbol)
+        last_timestamp_record = self.history_resolution_1_repo.get_last_timestamp_record_by_symbol(symbol)
+        if last_timestamp_record is None:
             last_timestamp = TimestampUtils.minimum_timestamp - 1
+        else:
+            last_timestamp = last_timestamp_record.t
+        current_timestamp = int(TimestampUtils.timestamp_now())
 
         # Get data from last_timestamp+1 to current_time
         data = SSIUtils.get_history_resolution_1(symbol=symbol, _from=last_timestamp + 1, _to=current_timestamp)
@@ -47,13 +43,13 @@ class HistoryResolution1Service(BaseService):
                     'symbol': symbol
                 }
             )
-        inserted_records = self.dao.add_all(converted_data)
-        return DataUtils.records_to_dict(inserted_records)
+        inserted_records = self.history_resolution_1_repo.insert_records(converted_data)
+        return inserted_records
 
     def update_newest_all_symbol(self):
-        ticket_records = self.ticket_dao.get_all()
+        ticket_records = self.ticket_repo.get_all()
         if len(ticket_records) == 0:
-            raise ResponseException(http_code=ResponseCode.NOT_FOUND,
+            raise ResponseException(http_code=status.HTTP_404_NOT_FOUND,
                                     message=TicketMessageConst.TICKET_SYMBOL_NOT_EXISTS.format(symbol='all'))
         results = []
         for ticket_record in ticket_records:

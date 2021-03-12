@@ -1,23 +1,32 @@
-import os
 from flask import (
     Flask,
     make_response
 )
 from flask_cors import CORS
 from flask_restx import Api
-from internal.src.utils.config_utils import get_system_config
-from internal.src.http.response.base import BaseResponse
-from internal.src.utils.response_utils import ResponseUtils
-from internal.src.services.exception.response_exception import ResponseException
-from internal.src.services.exception.system_exception import SystemException
+from internal.libs.utils.config_utils import get_system_config
+from internal.libs.http_handlers.response.base import BaseResponse
+from internal.libs.http_handlers.response.response_utils import ResponseUtils
+from internal.libs.http_handlers.exception.response_exception import ResponseException
+
+PREFIX = "/crawls/v1"
 
 app = Flask(__name__)
 CORS(app)
-env = os.getenv("FLASK_ENV")
-config_data = get_system_config(env)
-app.config["SYS"] = config_data
 
-api = Api(app, prefix="/api.dev.vn/crawls/v1")
+config = {
+    # App config
+    'FLASK_PORT': 'FLASK_PORT',
+    'FLASK_ENV': 'FLASK_ENV',
+    'FLASK_DEBUG': 'FLASK_DEBUG',
+
+    # Database config
+    'MONGODB_URI': 'MONGODB_URI'
+}
+
+app.config["SYS"] = get_system_config(config)
+app.config["SYS"]['FLASK_DEBUG'] = int(app.config["SYS"]['FLASK_DEBUG'])
+api = Api(app, prefix=PREFIX)
 
 
 @api.representation('application/json')
@@ -31,15 +40,10 @@ def represent(data, code, headers=None):
 
 
 @api.errorhandler(ResponseException)
-def handle_custom_exception(exception):
-    return ResponseUtils.parse_response_from_exception(exception)
-
-
-@api.errorhandler(SystemException)
-def handle_custom_exception(exception):
-    return ResponseUtils.parse_response_from_exception(exception)
+def handle_responese_exception(exception):
+    return ResponseUtils.parse_response_from_exception(exception, debug=app.config["SYS"]['FLASK_DEBUG'])
 
 
 @api.errorhandler(Exception)
-def handle_custom_exception(exception):
-    return ResponseUtils.parse_response_from_exception(exception)
+def handle_system_exception(exception):
+    return ResponseUtils.parse_response_from_exception(exception, debug=app.config["SYS"]['FLASK_DEBUG'])

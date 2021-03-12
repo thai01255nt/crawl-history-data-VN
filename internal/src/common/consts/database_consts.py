@@ -1,8 +1,2 @@
-class FieldType:
-    DICT = "dict"
-    STRING = "string"
-    NUMBER = "number"
-    OID = "oid"
-    SELECT = "select"
-    LIST = "list"
-    BOOL = "bool"
+class DbAliasType:
+    API_HISTORY_DATA_VN = "api-history-data-vn"

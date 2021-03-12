@@ -1,4 +1,4 @@
-from internal.db.psql import db
+from internal.db.mongo import db
 
 
 class RawDAO():
