@@ -1,3 +1,4 @@
+from pymongo import UpdateOne
 from internal.db.mongo import db
 
 
@@ -23,6 +24,13 @@ class BaseRepository:
             setattr(record, update_field, update_data[update_field])
         record = record.save()
         return record
+
+    def update_records(self, update_data):
+        bulk_operations = []
+        for data in update_data:
+            bulk_operations.append(
+                UpdateOne({'_id':data['_id']})
+            )
 
     def get_record_by_id(self, record_id):
         record = self.entity.objects(id=record_id).first()
