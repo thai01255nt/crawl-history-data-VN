@@ -1,6 +1,6 @@
 from internal.app import api
 
-from internal.db.psql import db
+from internal.db.mongo import db
 
 from internal.src.http.handlers.history_vn.ticket import TicketUpdateNewestController
 from internal.src.http.handlers.history_vn.history_resolution_1 import HistoryResolution1UpdateNewestController

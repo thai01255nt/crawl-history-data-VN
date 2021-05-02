@@ -1,6 +1,6 @@
 from flask_mongoengine import MongoEngine
 from internal.app import app
-from internal.src.common.consts.database_consts import DbAliasType
+from internal.common.consts.database_consts import DbAliasType
 config = app.config['SYS']
 
 mongodb_settings = {

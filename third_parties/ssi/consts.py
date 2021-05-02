@@ -1,0 +1,3 @@
+class SSIMessageConsts:
+    pass
+Z
