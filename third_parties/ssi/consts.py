@@ -1,3 +1,0 @@
-class SSIMessageConsts:
-    pass
-Z

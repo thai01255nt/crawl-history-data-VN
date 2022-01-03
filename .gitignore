@@ -1,4 +1,18 @@
-venv
+# IDE
 .idea
-*__pycache__*
+
+# venv
+venv
+
+# config
 .env
+alembic.ini
+
+# cpython
+*__pycache__*
+
+# Jupyter notebook
+*.ipynb_checkpoints*
+
+# Resource
+dataset

@@ -1,6 +1,0 @@
-.idea/
-venv/
-.vscode/
-__pycache__
-configs/*
-!configs/*.example
